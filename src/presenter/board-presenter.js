@@ -18,14 +18,14 @@ export default class BoardPresenter {
   init() {
     render(new SortView(), this.boardContainer);
     render(this.pointListComponent, this.boardContainer);
-    render(new EditPointView(), this.pointListComponent.getElement());
-    render(new AddNewPointView(), this.pointListComponent.getElement());
 
     const points = this.pointsModel.getPoints();
 
     const enrichedPoints = points.map((point) => {
       const destinationObj = this.pointsModel.getDestinationById(point.destination);
       const destinationName = destinationObj ? destinationObj.name : 'Unknown';
+      const destinationDescription = destinationObj ? destinationObj.description : '';
+      const destinationPictures = destinationObj?.pictures || [];
 
       const offerTypeGroup = this.pointsModel.getOfferByType(point.type);
       let resolvedOffers = [];
@@ -38,6 +38,8 @@ export default class BoardPresenter {
       return {
         ...point,
         destinationName,
+        destinationDescription,
+        destinationPictures,
         resolvedOffers,
         dateFrom: point.date_from,
         dateTo: point.date_to,
@@ -45,6 +47,11 @@ export default class BoardPresenter {
         isFavorite: point.is_favorite
       };
     });
+
+    if (enrichedPoints.length > 0) {
+      render(new EditPointView({ point: enrichedPoints[1] }), this.pointListComponent.getElement());
+      render(new AddNewPointView({ point: enrichedPoints[0] }), this.pointListComponent.getElement());
+    }
 
     enrichedPoints.forEach((enrichedPoint) => {
       render(new PointView({ point: enrichedPoint }), this.pointListComponent.getElement());
