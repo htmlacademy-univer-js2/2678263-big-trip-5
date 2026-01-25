@@ -1,7 +1,7 @@
-import { INITIAL_POINTS_COUNT } from "../constants";
-import { getPointRandom } from "../mock/points";
-import { offersMock } from "../mock/offers";
-import { destinationsMock } from "../mock/destination";
+import { INITIAL_POINTS_COUNT } from '../constants';
+import { getPointRandom } from '../mock/points';
+import { offersMock } from '../mock/offers';
+import { destinationsMock } from '../mock/destination';
 
 export default class PointsModel {
   constructor() {
@@ -36,5 +36,4 @@ export default class PointsModel {
     const offersTypes = this.getOfferByType(type);
     return offersTypes.offers.find((offer) => offer.id === offersId);
   }
-
 }

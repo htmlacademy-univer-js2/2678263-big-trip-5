@@ -1,34 +1,72 @@
 import {createElement} from '../render.js';
 
-function createPointTemplate() {
-  return (
-    `<li class="trip-events__item">
+function createPointTemplate(point) {
+  const {
+    type,
+    destinationName,
+    dateFrom,
+    dateTo,
+    basePrice,
+    resolvedOffers = [],
+    isFavorite
+  } = point;
+
+  const formatDate = (isoString) => {
+    const parts = isoString.split('T')[0].split('-');
+    const month = parts[1];
+    const day = parts[2];
+
+    const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    return `${day} ${monthNames[Number(month) - 1]}`;
+  };
+
+  const formatTime = (isoString) => isoString.split('T')[1].slice(0, 5);
+
+  const dateStr = formatDate(dateFrom);
+  const timeStart = formatTime(dateFrom);
+  const timeEnd = formatTime(dateTo);
+  const duration = '1H 30M';
+
+  const typeIcon = `img/icons/${type.toLowerCase()}.png`;
+  const title = `${type.charAt(0).toUpperCase() + type.slice(1)} ${destinationName}`;
+
+  const offersList = resolvedOffers.map((offer) => `
+    <li class="event__offer">
+      <span class="event__offer-title">${offer.title}</span>
+      &plus;&euro;&nbsp;
+      <span class="event__offer-price">${offer.price}</span>
+    </li>
+  `).join('');
+
+  const favoriteBtnClass = isFavorite
+    ? 'event__favorite-btn event__favorite-btn--active'
+    : 'event__favorite-btn';
+
+  return `
+    <li class="trip-events__item">
       <div class="event">
-        <time class="event__date" datetime="2019-03-18">MAR 18</time>
+        <time class="event__date" datetime="${dateFrom.split('T')[0]}">${dateStr}</time>
         <div class="event__type">
-          <img class="event__type-icon" width="42" height="42" src="img/icons/taxi.png" alt="Event type icon">
+          <img class="event__type-icon" width="42" height="42" src="${typeIcon}" alt="Event type icon">
         </div>
-        <h3 class="event__title">Taxi Amsterdam</h3>
+        <h3 class="event__title">${title}</h3>
         <div class="event__schedule">
           <p class="event__time">
-            <time class="event__start-time" datetime="2019-03-18T10:30">10:30</time>
+            <time class="event__start-time" datetime="${dateFrom}">${timeStart}</time>
             &mdash;
-            <time class="event__end-time" datetime="2019-03-18T11:00">11:00</time>
+            <time class="event__end-time" datetime="${dateTo}">${timeEnd}</time>
           </p>
-          <p class="event__duration">30M</p>
+          <p class="event__duration">${duration}</p>
         </div>
         <p class="event__price">
-          &euro;&nbsp;<span class="event__price-value">20</span>
+          &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
         </p>
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">
-          <li class="event__offer">
-            <span class="event__offer-title">Order Uber</span>
-            &plus;&euro;&nbsp;
-            <span class="event__offer-price">20</span>
-          </li>
+          ${offersList}
         </ul>
-        <button class="event__favorite-btn event__favorite-btn--active" type="button">
+        <button class="${favoriteBtnClass}" type="button">
           <span class="visually-hidden">Add to favorite</span>
           <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
             <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
@@ -38,13 +76,17 @@ function createPointTemplate() {
           <span class="visually-hidden">Open event</span>
         </button>
       </div>
-     </li>`
-  );
+    </li>
+  `;
 }
 
 export default class PointView {
+  constructor({point}) {
+    this.point = point;
+  }
+
   getTemplate() {
-    return createPointTemplate();
+    return createPointTemplate(this.point);
   }
 
   getElement() {
