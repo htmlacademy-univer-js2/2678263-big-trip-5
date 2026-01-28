@@ -13,26 +13,53 @@ export default class PointsModel {
     this.#destinations = destinationsMock;
   }
 
-  getPoints() {
+  get points() {
     return this.#points;
   }
 
-  getOffers() {
+  get offers() {
     return this.#offers;
   }
 
-  getDestinations() {
+  get destinations() {
     return this.#destinations;
   }
 
   getDestinationById(id) {
-    const allDestinations = this.getDestinations();
+    const allDestinations = this.destinations;
     return allDestinations.find((destination) => destination.id === id);
   }
 
   getOfferByType(type) {
-    const allOffers = this.getOffers();
+    const allOffers = this.offers;
     return allOffers.find((offer) => offer.type === type);
   }
 
+  getEnrichedPoints() {
+    return this.#points.map((point) => {
+      const destinationItem = this.getDestinationById(point.destination);
+      const destinationName = destinationItem?.name ?? 'Unknown';
+      const destinationDescription = destinationItem?.description ?? '';
+      const destinationPictures = destinationItem?.pictures ?? [];
+      const offerTypeGroup = this.getOfferByType(point.type);
+
+      let resolvedOffers = [];
+
+      if (offerTypeGroup && Array.isArray(offerTypeGroup.offers)) {
+        resolvedOffers = point.offers
+          .map((offerId) =>
+            offerTypeGroup.offers.find((offer) => offer.id === offerId),
+          )
+          .filter(Boolean);
+      }
+
+      return {
+        ...point,
+        destinationName,
+        destinationDescription,
+        destinationPictures,
+        resolvedOffers,
+      };
+    });
+  }
 }

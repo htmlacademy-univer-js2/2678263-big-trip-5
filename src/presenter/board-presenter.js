@@ -18,35 +18,7 @@ export default class BoardPresenter {
     render(new SortView(), this.boardContainer);
     render(this.pointListComponent, this.boardContainer);
 
-    const points = this.pointsModel.getPoints();
-
-    const enrichedPoints = points.map((point) => {
-      const destinationItem = this.pointsModel.getDestinationById(
-        point.destination,
-      );
-
-      const destinationName = destinationItem?.name ?? 'Unknown';
-      const destinationDescription = destinationItem?.description ?? '';
-      const destinationPictures = destinationItem?.pictures ?? [];
-
-      const offerTypeGroup = this.pointsModel.getOfferByType(point.type);
-      let resolvedOffers = [];
-      if (offerTypeGroup && Array.isArray(offerTypeGroup.offers)) {
-        resolvedOffers = point.offers
-          .map((offerId) =>
-            offerTypeGroup.offers.find((offer) => offer.id === offerId),
-          )
-          .filter(Boolean);
-      }
-
-      return {
-        ...point,
-        destinationName,
-        destinationDescription,
-        destinationPictures,
-        resolvedOffers,
-      };
-    });
+    const enrichedPoints = this.pointsModel.getEnrichedPoints();
 
     if (enrichedPoints.length > 0) {
       render(
