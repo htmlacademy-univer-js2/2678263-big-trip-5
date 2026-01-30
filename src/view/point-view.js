@@ -1,4 +1,5 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
+
 import {getFormatDate, getFormatTime, getDuration} from '../utils.js';
 
 function createPointTemplate(point) {
@@ -69,26 +70,30 @@ function createPointTemplate(point) {
   `;
 }
 
-export default class PointView {
-  constructor({point}) {
-    this.point = point;
+export default class PointView extends AbstractView {
+
+  #point = null;
+  #onOpenEditButtonClick = null;
+
+  constructor({point, onEditClick}) {
+    super();
+    this.#point = point;
+    this.#onOpenEditButtonClick = onEditClick;
+    this.#setEventListeners();
   }
 
-  getTemplate() {
-    return createPointTemplate(this.point);
+  get template() {
+    return createPointTemplate(this.#point);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
+  #setEventListeners() {
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onOpenEditButtonClickHandler);
   }
 
-  removeElement() {
-    this.element = null;
-  }
+  #onOpenEditButtonClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#onOpenEditButtonClick();
+  };
 }
 
 

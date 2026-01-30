@@ -1,41 +1,63 @@
 import SortView from '../view/sort-view.js';
 import PointListView from '../view/point-list-view.js';
-import AddNewPointView from '../view/add-new-point-view.js';
 import EditPointView from '../view/edit-point-view.js';
 import PointView from '../view/point-view.js';
 import PointsModel from '../model/points-model.js';
 
-import { render } from '../render.js';
+import { render, replace } from '../framework/render.js';
 
 export default class BoardPresenter {
+  #boardContainer = null;
+  #pointsModel = new PointsModel();
+  #pointListComponent = new PointListView();
+
   constructor({ boardContainer }) {
-    this.boardContainer = boardContainer;
-    this.pointsModel = new PointsModel();
-    this.pointListComponent = new PointListView();
+    this.#boardContainer = boardContainer;
   }
 
   init() {
-    render(new SortView(), this.boardContainer);
-    render(this.pointListComponent, this.boardContainer);
+    render(new SortView(), this.#boardContainer);
+    render(this.#pointListComponent, this.#boardContainer);
 
-    const enrichedPoints = this.pointsModel.getEnrichedPoints();
+    const enrichedPoints = this.#pointsModel.getEnrichedPoints();
+    enrichedPoints.forEach((enrichedPoint) => {
+      this.#renderPoint(enrichedPoint);
+    });
+  }
 
-    if (enrichedPoints.length > 0) {
-      render(
-        new EditPointView({ point: enrichedPoints[1] }),
-        this.pointListComponent.getElement(),
-      );
-      render(
-        new AddNewPointView({ point: enrichedPoints[0] }),
-        this.pointListComponent.getElement(),
-      );
+  #renderPoint(enrichedPoint) {
+    const escKeyDownHandler = (evt) => {
+      if (evt.key === 'Escape') {
+        evt.preventDefault();
+        replaceFormToCard();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    };
+    const pointComponent = new PointView({
+      point: enrichedPoint,
+      onEditClick: () => {
+        replaceCardToForm();
+        document.addEventListener('keydown', escKeyDownHandler);
+      },
+    });
+
+    const pointEditComponent = new EditPointView({
+      point: enrichedPoint,
+      onFormSubmit: () => {
+        replaceFormToCard();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      },
+    });
+
+
+    function replaceCardToForm() {
+      replace(pointEditComponent, pointComponent);
     }
 
-    enrichedPoints.forEach((enrichedPoint) => {
-      render(
-        new PointView({ point: enrichedPoint }),
-        this.pointListComponent.getElement(),
-      );
-    });
+    function replaceFormToCard() {
+      replace(pointComponent, pointEditComponent);
+    }
+
+    render(pointComponent, this.#pointListComponent.element);
   }
 }
