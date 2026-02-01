@@ -30,25 +30,32 @@ export default class BoardPresenter {
       if (evt.key === 'Escape') {
         evt.preventDefault();
         replaceFormToCard();
-        document.removeEventListener('keydown', escKeyDownHandler);
       }
     };
+
+    const handleRollupClick = () => {
+      replaceFormToCard();
+    };
+
+    const handleEditClick = () => {
+      replaceCardToForm();
+      document.addEventListener('keydown', escKeyDownHandler);
+    };
+
+    const handleFormSubmit = () => {
+      replaceFormToCard();
+    };
+
     const pointComponent = new PointView({
       point: enrichedPoint,
-      onEditClick: () => {
-        replaceCardToForm();
-        document.addEventListener('keydown', escKeyDownHandler);
-      },
+      onEditClick: handleEditClick,
     });
 
     const pointEditComponent = new EditPointView({
       point: enrichedPoint,
-      onFormSubmit: () => {
-        replaceFormToCard();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      },
+      onFormSubmit: handleFormSubmit,
+      onRollupClick: handleRollupClick,
     });
-
 
     function replaceCardToForm() {
       replace(pointEditComponent, pointComponent);
@@ -56,6 +63,7 @@ export default class BoardPresenter {
 
     function replaceFormToCard() {
       replace(pointComponent, pointEditComponent);
+      document.removeEventListener('keydown', escKeyDownHandler);
     }
 
     render(pointComponent, this.#pointListComponent.element);
