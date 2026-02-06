@@ -285,6 +285,4 @@ const pointsMock = [
   },
 ];
 
-const getPointRandom = () => getRandomArrayElement(pointsMock);
-
-export { getPointRandom };
+export const getPointRandom = () => getRandomArrayElement(pointsMock);
