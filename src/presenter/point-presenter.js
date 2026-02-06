@@ -7,6 +7,7 @@ import { render, remove, replace } from '../framework/render.js';
 export default class PointPresenter {
   #pointListContainer = null;
   #handleModeChange = null;
+  #handleDataChange = null;
 
   #pointComponent = null;
   #pointEditComponent = null;
@@ -14,9 +15,10 @@ export default class PointPresenter {
   #point = null;
   #mode = Mode.DEFAULT;
 
-  constructor({ pointListContainer, onModeChange }) {
+  constructor({ pointListContainer, onModeChange, onDataChange }) {
     this.#pointListContainer = pointListContainer;
     this.#handleModeChange = onModeChange;
+    this.#handleDataChange = onDataChange;
   }
 
   init(point) {
@@ -28,6 +30,7 @@ export default class PointPresenter {
     this.#pointComponent = new PointView({
       point: this.#point,
       onEditClick: this.#handleEditClick,
+      onFavoriteClick: this.#handleFavoriteClick,
     });
 
     this.#pointEditComponent = new EditPointView({
@@ -88,10 +91,13 @@ export default class PointPresenter {
 
   #handleEditClick = () => {
     this.#replaceCardToForm();
-    // document.addEventListener("keydown", this.#escKeyDownHandler);
   };
 
   #handleFormSubmit = () => {
     this.#replaceFormToCard();
+  };
+
+  #handleFavoriteClick = () => {
+    this.#handleDataChange({...this.#point, isFavorite: !this.#point.isFavorite});
   };
 }

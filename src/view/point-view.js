@@ -74,12 +74,17 @@ export default class PointView extends AbstractView {
 
   #point = null;
   #onOpenEditButtonClick = null;
+  #handleFavoriteClick = null;
 
-  constructor({point, onEditClick}) {
+  constructor({point, onEditClick, onFavoriteClick}) {
     super();
     this.#point = point;
     this.#onOpenEditButtonClick = onEditClick;
     this.#setEventListeners();
+    this.#handleFavoriteClick = onFavoriteClick;
+
+    this.element.querySelector('.event__favorite-btn')
+      .addEventListener('click', this.#favoriteClickHandler);
   }
 
   get template() {
@@ -94,6 +99,12 @@ export default class PointView extends AbstractView {
     evt.preventDefault();
     this.#onOpenEditButtonClick();
   };
+
+  #favoriteClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleFavoriteClick();
+  };
+
 }
 
 
