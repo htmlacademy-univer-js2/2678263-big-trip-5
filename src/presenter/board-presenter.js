@@ -20,7 +20,7 @@ export default class BoardPresenter {
   }
 
   init() {
-    render(new SortView(), this.#boardContainer);
+    render(this.#sortComponent, this.#boardContainer);
     render(this.#pointListComponent, this.#boardContainer);
 
     const enrichedPoints = this.#pointsModel.getEnrichedPoints();
