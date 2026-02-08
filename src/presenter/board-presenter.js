@@ -4,6 +4,7 @@ import PointsModel from '../model/points-model.js';
 import PointPresenter from './point-presenter.js';
 import { updateItem } from '../utils/utils.js';
 import { SORT_FUNCTIONS } from '../utils/sort.js';
+import { SortType } from '../constants.js';
 
 import { render, RenderPosition } from '../framework/render.js';
 
@@ -15,6 +16,8 @@ export default class BoardPresenter {
 
   #boardPoints = [];
   #pointPresenters = new Map();
+  #currentSortType = SortType.DAY;
+  #sourcedBoardPoints = [];
 
   constructor({ boardContainer }) {
     this.#boardContainer = boardContainer;
@@ -22,6 +25,7 @@ export default class BoardPresenter {
 
   init() {
     this.#boardPoints = this.#pointsModel.getEnrichedPoints();
+    this.#sourcedBoardPoints = [...this.#boardPoints];
     this.#boardPoints.sort(SORT_FUNCTIONS.day);
 
     this.#renderSort();
@@ -31,6 +35,10 @@ export default class BoardPresenter {
 
   #handleTaskChange = (updatedPoint) => {
     this.#boardPoints = updateItem(this.#boardPoints, updatedPoint);
+    this.#sourcedBoardPoints = updateItem(
+      this.#sourcedBoardPoints,
+      updatedPoint,
+    );
     this.#pointPresenters.get(updatedPoint.id).init(updatedPoint);
   };
 
@@ -39,10 +47,17 @@ export default class BoardPresenter {
   };
 
   #handleSortTypeChange = (sortType) => {
-    this.#boardPoints.sort(SORT_FUNCTIONS[sortType]);
+    if (this.#currentSortType === sortType) {
+      return;
+    }
 
+    this.#currentSortType = sortType;
+    if (sortType === SortType.DAY) {
+      this.#boardPoints = [...this.#sourcedBoardPoints];
+    } else {
+      this.#boardPoints.sort(SORT_FUNCTIONS[sortType]);
+    }
     this.#clearPointList();
-
     this.#renderPoints();
   };
 

@@ -14,17 +14,18 @@ function getWeightForNullValue(valueA, valueB) {
   return null;
 }
 
-export function sortPointByDay(pointA, pointB) {
-  const weight = getWeightForNullValue(pointA.dateFrom, pointB.dateFrom);
-  if (weight !== null) {
-    return weight;
-  }
-  return dayjs(pointA.dateFrom).diff(dayjs(pointB.dateFrom));
-}
+// export function sortPointByDay(pointA, pointB) {
+//   const weight = getWeightForNullValue(pointA.dateFrom, pointB.dateFrom);
+//   if (weight !== null) {
+//     return weight;
+//   }
+//   return dayjs(pointA.dateFrom).diff(dayjs(pointB.dateFrom));
+// }
 
 export function sortPointByTime(pointA, pointB) {
-  const durationA = dayjs(pointA.dateTo).diff(dayjs(pointA.dateFrom));
-  const durationB = dayjs(pointB.dateTo).diff(dayjs(pointB.dateFrom));
+  const durationA = dayjs(pointB.dateTo).diff(dayjs(pointB.dateFrom));
+  const durationB = dayjs(pointA.dateTo).diff(dayjs(pointA.dateFrom));
+
 
   return durationA - durationB;
 }
@@ -34,11 +35,11 @@ export function sortPointByPrice(pointA, pointB) {
   if (weight !== null) {
     return weight;
   }
-  return pointA.basePrice - pointB.basePrice;
+  return pointB.basePrice - pointA.basePrice;
 }
 
 export const SORT_FUNCTIONS = {
-  [SortType.DAY]: sortPointByDay,
+  // [SortType.DAY]: sortPointByDay,
   [SortType.TIME]: sortPointByTime,
   [SortType.PRICE]: sortPointByPrice
 };
