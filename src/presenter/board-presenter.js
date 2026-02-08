@@ -2,15 +2,16 @@ import SortView from '../view/sort-view.js';
 import PointListView from '../view/point-list-view.js';
 import PointsModel from '../model/points-model.js';
 import PointPresenter from './point-presenter.js';
-import { updateItem } from '../utils.js';
+import { updateItem } from '../utils/utils.js';
+import { SORT_FUNCTIONS } from '../utils/sort.js';
 
-import { render } from '../framework/render.js';
+import { render, RenderPosition } from '../framework/render.js';
 
 export default class BoardPresenter {
   #boardContainer = null;
   #pointsModel = new PointsModel();
   #pointListComponent = new PointListView();
-  #sortComponent = new SortView();
+  #sortComponent = null;
 
   #boardPoints = [];
   #pointPresenters = new Map();
@@ -20,13 +21,12 @@ export default class BoardPresenter {
   }
 
   init() {
-    render(this.#sortComponent, this.#boardContainer);
-    render(this.#pointListComponent, this.#boardContainer);
+    this.#boardPoints = this.#pointsModel.getEnrichedPoints();
+    this.#boardPoints.sort(SORT_FUNCTIONS.day);
 
-    const enrichedPoints = this.#pointsModel.getEnrichedPoints();
-    enrichedPoints.forEach((enrichedPoint) => {
-      this.#renderPoint(enrichedPoint);
-    });
+    this.#renderSort();
+    render(this.#pointListComponent, this.#boardContainer);
+    this.#renderPoints();
   }
 
   #handleTaskChange = (updatedPoint) => {
@@ -38,13 +38,47 @@ export default class BoardPresenter {
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
   };
 
+  #handleSortTypeChange = (sortType) => {
+    this.#boardPoints.sort(SORT_FUNCTIONS[sortType]);
+
+    this.#clearPointList();
+
+    this.#renderPoints();
+  };
+
+  #renderSort() {
+    this.#sortComponent = new SortView({
+      onSortTypeChange: this.#handleSortTypeChange,
+    });
+
+    render(
+      this.#sortComponent,
+      this.#boardContainer,
+      RenderPosition.AFTERBEGIN,
+    );
+  }
+
   #renderPoint(enrichedPoint) {
     const pointPresenter = new PointPresenter({
       pointListContainer: this.#pointListComponent.element,
       onModeChange: this.#handleModeChange,
-      onDataChange: this.#handleTaskChange
+      onDataChange: this.#handleTaskChange,
     });
     pointPresenter.init(enrichedPoint);
     this.#pointPresenters.set(enrichedPoint.id, pointPresenter);
+  }
+
+  #renderPoints() {
+    this.#boardPoints.forEach((point) => {
+      this.#renderPoint(point);
+    });
+  }
+
+  #clearPointList() {
+    this.#pointPresenters.forEach((presenter) => {
+      presenter.destroy();
+    });
+    this.#pointPresenters.clear();
+    this.#pointListComponent.element.innerHTML = '';
   }
 }

@@ -1,10 +1,15 @@
-import { MONTH_NAMES, MINUTES_IN_DAY, MINUTES_IN_HOUR, MS_IN_MINUTE } from './constants';
+import {
+  MONTH_NAMES,
+  MINUTES_IN_DAY,
+  MINUTES_IN_HOUR,
+  MS_IN_MINUTE,
+} from '../constants';
 export function getRandomArrayElement(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
 export function updateItem(items, update) {
-  return items.map((item) => item.id === update.id ? update : item);
+  return items.map((item) => (item.id === update.id ? update : item));
 }
 
 export function getFormatDate(isoString) {
@@ -33,8 +38,8 @@ export function getDuration(startIso, endIso) {
   }
 
   const totalMinutes = Math.floor(diffMs / MS_IN_MINUTE);
-  const days = Math.floor(totalMinutes / (MINUTES_IN_DAY));
-  const hours = Math.floor((totalMinutes % (MINUTES_IN_DAY)) / MINUTES_IN_HOUR);
+  const days = Math.floor(totalMinutes / MINUTES_IN_DAY);
+  const hours = Math.floor((totalMinutes % MINUTES_IN_DAY) / MINUTES_IN_HOUR);
   const minutes = totalMinutes % MINUTES_IN_HOUR;
 
   const parts = [];
@@ -64,4 +69,3 @@ export function getDateAndTimeFromISO(isoString) {
   const minutes = String(d.getMinutes()).padStart(2, '0');
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
-

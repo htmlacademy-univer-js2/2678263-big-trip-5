@@ -1,6 +1,6 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
-import {getFormatDate, getFormatTime, getDuration} from '../utils.js';
+import {getFormatDate, getFormatTime, getDuration} from '../utils/utils.js';
 
 function createPointTemplate(point) {
   const {

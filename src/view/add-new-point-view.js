@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { getDateAndTimeFromISO } from '../utils.js';
+import { getDateAndTimeFromISO } from '../utils/utils.js';
 
 function createPointEditTemplate(point) {
   const {

@@ -39,7 +39,6 @@ export default class PointPresenter {
       onRollupClick: this.#handleRollupClick,
     });
 
-
     if (prevPointComponent === null || prevPointEditComponent === null) {
       render(this.#pointComponent, this.#pointListContainer);
       return;
@@ -52,6 +51,8 @@ export default class PointPresenter {
     if (this.#mode === Mode.EDITING) {
       replace(this.#pointEditComponent, prevPointEditComponent);
     }
+    remove(prevPointComponent);
+    remove(prevPointEditComponent);
   }
 
   destroy() {
@@ -98,6 +99,9 @@ export default class PointPresenter {
   };
 
   #handleFavoriteClick = () => {
-    this.#handleDataChange({...this.#point, isFavorite: !this.#point.isFavorite});
+    this.#handleDataChange({
+      ...this.#point,
+      isFavorite: !this.#point.isFavorite,
+    });
   };
 }
