@@ -52,11 +52,8 @@ export default class BoardPresenter {
     }
 
     this.#currentSortType = sortType;
-    if (sortType === SortType.DAY) {
-      this.#boardPoints = [...this.#sourcedBoardPoints];
-    } else {
-      this.#boardPoints.sort(SORT_FUNCTIONS[sortType]);
-    }
+    this.#boardPoints.sort(SORT_FUNCTIONS[sortType]);
+
     this.#clearPointList();
     this.#renderPoints();
   };
