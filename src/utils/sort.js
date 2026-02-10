@@ -1,19 +1,6 @@
 import dayjs from 'dayjs';
 import { SortType } from '../constants.js';
 
-// function getWeightForNullValue(valueA, valueB) {
-//   if (valueA === null && valueB === null) {
-//     return 0;
-//   }
-//   if (valueA === null || valueA === undefined) {
-//     return 1;
-//   }
-//   if (valueB === null || valueB === undefined) {
-//     return -1;
-//   }
-//   return null;
-// }
-
 export function sortPointByDay(pointA, pointB) {
   return dayjs(pointA.dateFrom).diff(dayjs(pointB.dateFrom));
 }
