@@ -1,4 +1,4 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { getDateAndTimeFromISO } from '../utils/utils.js';
 
 function editPointTemplate(point) {
@@ -23,7 +23,7 @@ function editPointTemplate(point) {
              id="event-offer-${offer.id}"
              type="checkbox"
              name="event-offer-${offer.id}"
-             checked>
+             ${offer.isChecked ? 'checked' : ''}>
       <label class="event__offer-label" for="event-offer-${offer.id}">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
@@ -134,39 +134,120 @@ function editPointTemplate(point) {
      </li>`;
 }
 
-export default class EditPointView extends AbstractView {
-  #point = null;
+export default class EditPointView extends AbstractStatefulView {
   #handleFormSubmit = null;
   #handleRollupClick = null;
 
   constructor({ point, onFormSubmit, onRollupClick }) {
     super();
-    this.#point = point;
+    console.log('Создание EditPointView', { point });
+    this._setState(EditPointView.parsePointToState(point));
+    console.log('Состояние установлено:', this._state);
     this.#handleFormSubmit = onFormSubmit;
     this.#handleRollupClick = onRollupClick;
-    this.#addEventListeners();
+    this._restoreHandlers();
   }
 
   get template() {
-    return editPointTemplate(this.#point);
+    return editPointTemplate(this._state);
   }
 
-  #addEventListeners() {
-    this.element
-      .querySelector('form')
-      .addEventListener('submit', this.#formSubmitHandler);
+  _restoreHandlers() {
+    console.log('Восстановление обработчиков');
+    const form = this.element.querySelector('form');
+
+    form.addEventListener('submit', this.#formSubmitHandler);
     this.element
       .querySelector('.event__rollup-btn')
       .addEventListener('click', this.#rollupClickHandler);
+    form.addEventListener('change', this.#typeChangeHandler);
+    form.addEventListener('change', this.#offersChangeHandler);
+    form.addEventListener('input', this.#inputChangeHandler);
   }
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit();
+    console.log('Сабмит формы, состояние:', this._state);
+    this.#handleFormSubmit(EditPointView.parseStateToPoint(this._state));
   };
 
   #rollupClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleRollupClick();
   };
+
+  #typeChangeHandler = (evt) => {
+    if (evt.target.classList.contains('event__type-input')) {
+      this.updateElement({
+        type: evt.target.value,
+      });
+    }
+  };
+
+  #offersChangeHandler = (evt) => {
+    if (evt.target.classList.contains('event__offer-checkbox')) {
+      const offerId = evt.target.id.replace('event-offer-', '');
+      const isChecked = evt.target.checked;
+
+      const updatedOffers = this._state.resolvedOffers.map((offer) =>
+        offer.id === offerId ? { ...offer, isChecked } : offer,
+      );
+
+      this.updateElement({
+        resolvedOffers: updatedOffers,
+      });
+    }
+  };
+
+  #inputChangeHandler = (evt) => {
+    const target = evt.target;
+
+    switch (target.name) {
+      case 'event-destination':
+        this.updateElement({
+          destinationName: target.value,
+        });
+        break;
+      case 'event-start-time':
+        this.updateElement({
+          timeFrom: target.value,
+        });
+        break;
+      case 'event-end-time':
+        this.updateElement({
+          timeTo: target.value,
+        });
+        break;
+      case 'event-price':
+        this.updateElement({
+          basePrice: target.value,
+        });
+        break;
+    }
+  };
+
+  static parsePointToState(point) {
+    return {
+      ...point,
+      resolvedOffers: (point.resolvedOffers || []).map((offer) => ({
+        ...offer,
+        isChecked: offer.isChecked !== undefined ? offer.isChecked : true,
+      })),
+    };
+  }
+
+  static parseStateToPoint(state) {
+    const point = { ...state };
+    if (point.resolvedOffers) {
+      point.resolvedOffers = point.resolvedOffers.map((offer) => {
+        const { ...offerData } = offer;
+        return offerData;
+      });
+    }
+    console.log('parsePointToState:', {
+      вход: state,
+      выход: point,
+    });
+    return point;
+  }
 }
