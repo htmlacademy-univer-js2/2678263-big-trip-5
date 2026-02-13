@@ -22,7 +22,6 @@ function editPointTemplate(point) {
   const destinationNames = Array.isArray(point.destinations)
     ? point.destinations.map((dest) => dest.name)
     : [];
-  console.log('destinationNames in editPointTemplate:', destinationNames);
   const timeFrom = getDateAndTimeFromISO(dateFrom);
   const timeTo = getDateAndTimeFromISO(dateTo);
 
@@ -201,7 +200,6 @@ export default class EditPointView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    console.log('Сабмит формы, состояние:', this._state);
     this.#handleFormSubmit(EditPointView.parseStateToPoint(this._state));
   };
 
@@ -247,8 +245,6 @@ export default class EditPointView extends AbstractStatefulView {
         destinationPictures: destination?.pictures || [],
       });
     }
-    console.log('destinationChangeHandler', evt.target.value);
-    console.log('destinationChangeHandler', this._state);
   };
 
   static parsePointToState(point) {
@@ -263,12 +259,19 @@ export default class EditPointView extends AbstractStatefulView {
 
   static parseStateToPoint(state) {
     const point = { ...state };
+
     if (point.resolvedOffers) {
-      point.resolvedOffers = point.resolvedOffers.map((offer) => {
-        const { ...offerData } = offer;
-        return offerData;
-      });
+      point.offers = point.resolvedOffers
+        .filter((offer) => offer.isChecked)
+        .map((offer) => offer.id);
     }
+
+    delete point.resolvedOffers;
+    delete point.destinationName;
+    delete point.destinationDescription;
+    delete point.destinationPictures;
+    delete point.destinations;
+
     return point;
   }
 }

@@ -1,4 +1,4 @@
-export const INITIAL_POINTS_COUNT = 1;
+export const INITIAL_POINTS_COUNT = 5;
 export const MS_IN_MINUTE = 60 * 1000;
 export const MINUTES_IN_HOUR = 60;
 export const MINUTES_IN_DAY = 24 * MINUTES_IN_HOUR;

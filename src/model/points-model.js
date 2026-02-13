@@ -40,6 +40,12 @@ export default class PointsModel {
     return allOffers.find((offer) => offer.type === type);
   }
 
+  updatePoint(updatedPoint) {
+    this.#points = this.#points.map((point) =>
+      point.id === updatedPoint.id ? updatedPoint : point,
+    );
+  }
+
   getEnrichedPoints() {
     return this.#points.map((point) => {
       const destinationItem = this.getDestinationById(point.destination);
