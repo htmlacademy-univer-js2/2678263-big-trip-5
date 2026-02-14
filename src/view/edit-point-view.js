@@ -163,6 +163,7 @@ export default class EditPointView extends AbstractStatefulView {
   #handleTypeChange = null;
   #handleDestinationChange = null;
   #destinations = [];
+  #initialState = null;
 
   constructor({
     point,
@@ -172,6 +173,12 @@ export default class EditPointView extends AbstractStatefulView {
     onTypeChange,
   }) {
     super();
+
+    const preparedState = EditPointView.parsePointToState(point);
+
+    this._setState(preparedState);
+    this.#initialState = structuredClone(preparedState);
+
     this._setState(EditPointView.parsePointToState(point));
     this.#destinations = destinations;
     this.#handleFormSubmit = onFormSubmit;
@@ -267,11 +274,15 @@ export default class EditPointView extends AbstractStatefulView {
     }
   };
 
+  reset() {
+    this.updateElement(structuredClone(this.#initialState));
+  }
+
   static parsePointToState(point) {
     return {
       ...point,
       resolvedOffers: (point.resolvedOffers || []).map((offer) => ({
-        ...offer
+        ...offer,
       })),
     };
   }
