@@ -42,7 +42,7 @@ export default class PointsModel {
 
   updatePoint(updatedPoint) {
     this.#points = this.#points.map((point) =>
-      point.id === updatedPoint.id ? updatedPoint : point,
+      point.id === updatedPoint.id ? updatedPoint : point
     );
   }
 
@@ -62,6 +62,11 @@ export default class PointsModel {
             offerTypeGroup.offers.find((offer) => offer.id === offerId),
           )
           .filter(Boolean);
+
+        resolvedOffers = resolvedOffers.map((offer) => ({
+          ...offer,
+          isChecked: offer.isChecked !== undefined ? offer.isChecked : true,
+        }));
       }
 
       return {

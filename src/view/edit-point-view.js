@@ -41,7 +41,8 @@ function editPointTemplate(point) {
              id="event-offer-${offer.id}"
              type="checkbox"
              name="event-offer-${offer.id}"
-             ${offer.isChecked ? 'checked' : ''}>
+             ${offer.isChecked ? 'checked' : ''}
+             data-oferId="${offer.id}">
       <label class="event__offer-label" for="event-offer-${offer.id}">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
@@ -196,6 +197,7 @@ export default class EditPointView extends AbstractStatefulView {
     form.addEventListener('change', this.#typeChangeHandler);
     form.addEventListener('change', this.#offersChangeHandler);
     form.addEventListener('change', this.#destinationChangeHandler);
+    form.addEventListener('change', this.#offerCheckedHandler);
   }
 
   #formSubmitHandler = (evt) => {
@@ -243,6 +245,24 @@ export default class EditPointView extends AbstractStatefulView {
         destinationName: destinationName,
         destinationDescription: destination?.description || '-',
         destinationPictures: destination?.pictures || [],
+        destination: destination?.id || '',
+      });
+    }
+  };
+
+  #offerCheckedHandler = (evt) => {
+    if (evt.target.classList.contains('event__offer-checkbox')) {
+      const offers = this._state.resolvedOffers.map((offer) => {
+        if (offer.id === evt.target.dataset.oferid) {
+          return {
+            ...offer,
+            isChecked: !offer.isChecked,
+          };
+        }
+        return offer;
+      });
+      this.updateElement({
+        resolvedOffers: offers,
       });
     }
   };
@@ -251,8 +271,7 @@ export default class EditPointView extends AbstractStatefulView {
     return {
       ...point,
       resolvedOffers: (point.resolvedOffers || []).map((offer) => ({
-        ...offer,
-        isChecked: offer.isChecked !== undefined ? offer.isChecked : true,
+        ...offer
       })),
     };
   }

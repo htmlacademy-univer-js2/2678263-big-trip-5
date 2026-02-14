@@ -17,19 +17,9 @@ export default class BoardPresenter {
       destinations: this.#pointsModel.destinations,
       onPointChange: this.#handlePointChange,
       onModeChange: this.#handleModeChange,
-      getOffersByType: (type) => {
-        const result = this.#pointsModel.getOfferByType(type);
-        return result;
-      },
-
-      getDestinationById: (id) => {
-        const result = this.#pointsModel.getDestinationById(id);
-        return result;
-      },
-      getDescriptionById: (id) => {
-        const result = this.#pointsModel.getDescriptionById(id);
-        return result;
-      },
+      getOffersByType: (type) => this.#pointsModel.getOfferByType(type),
+      getDestinationById: (id) => this.#pointsModel.getDestinationById(id),
+      getDescriptionById: (id) => this.#pointsModel.getDescriptionById(id),
     });
     this.#pointsListPresenter.init(points);
   }
