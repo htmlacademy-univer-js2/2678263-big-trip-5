@@ -42,7 +42,7 @@ function editPointTemplate(point) {
              type="checkbox"
              name="event-offer-${offer.id}"
              ${offer.isChecked ? 'checked' : ''}
-             data-oferId="${offer.id}">
+             data-offerId="${offer.id}">
       <label class="event__offer-label" for="event-offer-${offer.id}">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
@@ -159,6 +159,7 @@ function editPointTemplate(point) {
 
 export default class EditPointView extends AbstractStatefulView {
   #handleFormSubmit = null;
+  #handeleDeleteClick = null;
   #handleRollupClick = null;
   #handleTypeChange = null;
   #destinations = [];
@@ -168,19 +169,20 @@ export default class EditPointView extends AbstractStatefulView {
     point,
     destinations,
     onFormSubmit,
+    onDeleteClick,
     onRollupClick,
     onTypeChange,
   }) {
     super();
 
     const preparedState = EditPointView.parsePointToState(point);
-
     this._setState(preparedState);
     this.#initialState = structuredClone(preparedState);
 
     this._setState(EditPointView.parsePointToState(point));
     this.#destinations = destinations;
     this.#handleFormSubmit = onFormSubmit;
+    this.#handeleDeleteClick = onDeleteClick;
     this.#handleRollupClick = onRollupClick;
     this.#handleTypeChange = onTypeChange;
     this._restoreHandlers();
@@ -197,6 +199,7 @@ export default class EditPointView extends AbstractStatefulView {
   _restoreHandlers() {
     const form = this.element.querySelector('form');
     form.addEventListener('submit', this.#formSubmitHandler);
+    form.addEventListener('reset', this.#deleteClickHandler);
     this.element
       .querySelector('.event__rollup-btn')
       .addEventListener('click', this.#rollupClickHandler);
@@ -208,6 +211,11 @@ export default class EditPointView extends AbstractStatefulView {
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
     this.#handleFormSubmit(EditPointView.parseStateToPoint(this._state));
+  };
+
+  #deleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handeleDeleteClick();
   };
 
   #rollupClickHandler = (evt) => {
@@ -250,7 +258,7 @@ export default class EditPointView extends AbstractStatefulView {
   #offerCheckedHandler = (evt) => {
     if (evt.target.classList.contains('event__offer-checkbox')) {
       const offers = this._state.resolvedOffers.map((offer) => {
-        if (offer.id === evt.target.dataset.oferid) {
+        if (offer.id === evt.target.dataset.offerid) {
           return {
             ...offer,
             isChecked: !offer.isChecked,

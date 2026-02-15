@@ -48,6 +48,7 @@ export default class PointPresenter {
       point: this.#point,
       destinations: this.#destinations,
       onFormSubmit: this.#handleFormSubmit,
+      onDeleteClick: this.#handleDeleteClick,
       onRollupClick: this.#handleRollupClick,
       onTypeChange: this.#handleTypeChange,
     });
@@ -111,6 +112,11 @@ export default class PointPresenter {
   #handleFormSubmit = (updatedPoint) => {
     this.#handleDataChange(updatedPoint);
     this.#replaceFormToCard();
+  };
+
+  #handleDeleteClick = () => {
+    this.#handleDataChange(this.#point);
+    this.destroy();
   };
 
   #handleFavoriteClick = () => {
