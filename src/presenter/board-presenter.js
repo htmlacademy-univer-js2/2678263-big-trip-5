@@ -14,14 +14,19 @@ export default class BoardPresenter {
     const points = this.#pointsModel.getEnrichedPoints();
     this.#pointsListPresenter = new PointsListPresenter({
       listContainer: this.#boardContainer,
+      destinations: this.#pointsModel.destinations,
       onPointChange: this.#handlePointChange,
       onModeChange: this.#handleModeChange,
+      getOffersByType: (type) => this.#pointsModel.getOfferByType(type),
+      getDestinationById: (id) => this.#pointsModel.getDestinationById(id),
+      getDescriptionById: (id) => this.#pointsModel.getDescriptionById(id),
     });
     this.#pointsListPresenter.init(points);
   }
 
-  #handlePointChange = () => {
-    // Callback для реакции на изменение точки маршрута
+  #handlePointChange = (updatedPoint) => {
+    this.#pointsModel.updatePoint(updatedPoint);
+    this.#pointsListPresenter.updatePoint(updatedPoint);
   };
 
   #handleModeChange = () => {

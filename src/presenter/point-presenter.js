@@ -14,11 +14,22 @@ export default class PointPresenter {
 
   #point = null;
   #mode = Mode.DEFAULT;
+  #destinations = [];
 
-  constructor({ pointListContainer, onModeChange, onDataChange }) {
+  #getOffersByType = null;
+
+  constructor({
+    pointListContainer,
+    destinations,
+    onModeChange,
+    onDataChange,
+    getOffersByType,
+  }) {
     this.#pointListContainer = pointListContainer;
+    this.#destinations = destinations;
     this.#handleModeChange = onModeChange;
     this.#handleDataChange = onDataChange;
+    this.#getOffersByType = getOffersByType;
   }
 
   init(point) {
@@ -35,8 +46,11 @@ export default class PointPresenter {
 
     this.#pointEditComponent = new EditPointView({
       point: this.#point,
+      destinations: this.#destinations,
       onFormSubmit: this.#handleFormSubmit,
+      onDeleteClick: this.#handleDeleteClick,
       onRollupClick: this.#handleRollupClick,
+      onTypeChange: this.#handleTypeChange,
     });
 
     if (prevPointComponent === null || prevPointEditComponent === null) {
@@ -74,6 +88,7 @@ export default class PointPresenter {
   }
 
   #replaceFormToCard() {
+    this.#pointEditComponent.reset();
     replace(this.#pointComponent, this.#pointEditComponent);
     document.removeEventListener('keydown', this.#escKeyDownHandler);
     this.#mode = Mode.DEFAULT;
@@ -94,8 +109,14 @@ export default class PointPresenter {
     this.#replaceCardToForm();
   };
 
-  #handleFormSubmit = () => {
+  #handleFormSubmit = (updatedPoint) => {
+    this.#handleDataChange(updatedPoint);
     this.#replaceFormToCard();
+  };
+
+  #handleDeleteClick = () => {
+    this.#handleDataChange(this.#point);
+    this.destroy();
   };
 
   #handleFavoriteClick = () => {
@@ -104,4 +125,6 @@ export default class PointPresenter {
       isFavorite: !this.#point.isFavorite,
     });
   };
+
+  #handleTypeChange = (type) => this.#getOffersByType(type).offers;
 }

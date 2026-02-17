@@ -30,9 +30,20 @@ export default class PointsModel {
     return allDestinations.find((destination) => destination.id === id);
   }
 
+  getDescriptionById(id) {
+    const destination = this.getDestinationById(id);
+    return destination?.description ?? '';
+  }
+
   getOfferByType(type) {
     const allOffers = this.offers;
     return allOffers.find((offer) => offer.type === type);
+  }
+
+  updatePoint(updatedPoint) {
+    this.#points = this.#points.map((point) =>
+      point.id === updatedPoint.id ? updatedPoint : point
+    );
   }
 
   getEnrichedPoints() {
@@ -51,6 +62,11 @@ export default class PointsModel {
             offerTypeGroup.offers.find((offer) => offer.id === offerId),
           )
           .filter(Boolean);
+
+        resolvedOffers = resolvedOffers.map((offer) => ({
+          ...offer,
+          isChecked: offer.isChecked !== undefined ? offer.isChecked : true,
+        }));
       }
 
       return {

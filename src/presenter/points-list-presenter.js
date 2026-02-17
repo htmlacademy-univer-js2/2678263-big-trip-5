@@ -9,6 +9,7 @@ import { render, remove, RenderPosition } from '../framework/render.js';
 
 export default class PointsListPresenter {
   #listContainer = null;
+  #destinations = [];
   #points = [];
   #sourcedPoints = [];
   #currentSortType = SortType.DAY;
@@ -19,11 +20,26 @@ export default class PointsListPresenter {
 
   #onPointChange = null;
   #onModeChange = null;
+  #getOffersByType = null;
+  #getDestinationById = null;
+  #getDescriptionById = null;
 
-  constructor({ listContainer, onPointChange, onModeChange }) {
+  constructor({
+    listContainer,
+    destinations,
+    onPointChange,
+    onModeChange,
+    getOffersByType,
+    getDestinationById,
+    getDescriptionById,
+  }) {
     this.#listContainer = listContainer;
+    this.#destinations = destinations;
     this.#onPointChange = onPointChange;
     this.#onModeChange = onModeChange;
+    this.#getOffersByType = getOffersByType;
+    this.#getDestinationById = getDestinationById;
+    this.#getDescriptionById = getDescriptionById;
   }
 
   init(points) {
@@ -58,23 +74,49 @@ export default class PointsListPresenter {
     this.#renderPoints();
   };
 
+  updatePoint(updatedPoint) {
+    const index = this.#points.findIndex(
+      (point) => point.id === updatedPoint.id,
+    );
+
+    if (index === -1) {
+      return;
+    }
+
+    this.#points = [
+      ...this.#points.slice(0, index),
+      updatedPoint,
+      ...this.#points.slice(index + 1),
+    ];
+
+    this.#sourcedPoints = [
+      ...this.#sourcedPoints.slice(0, index),
+      updatedPoint,
+      ...this.#sourcedPoints.slice(index + 1),
+    ];
+
+    this.#pointPresenters
+      .get(updatedPoint.id)
+      .init(updatedPoint);
+  }
+
   #renderSort() {
     this.#sortComponent = new SortView({
       onSortTypeChange: this.#handleSortTypeChange,
     });
 
-    render(
-      this.#sortComponent,
-      this.#listContainer,
-      RenderPosition.AFTERBEGIN,
-    );
+    render(this.#sortComponent, this.#listContainer, RenderPosition.AFTERBEGIN);
   }
 
   #renderPoint(point) {
     const pointPresenter = new PointPresenter({
       pointListContainer: this.#pointListComponent.element,
+      destinations: this.#destinations,
       onModeChange: this.#handleModeChange,
       onDataChange: this.#handlePointChange,
+      getOffersByType: (type) => this.#getOffersByType(type),
+      getDestinationById: (id) => this.#getDestinationById(id),
+      getDescriptionById: (id) => this.#getDescriptionById(id),
     });
     pointPresenter.init(point);
     this.#pointPresenters.set(point.id, pointPresenter);

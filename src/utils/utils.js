@@ -20,10 +20,6 @@ export function getFormatDate(isoString) {
   return `${day} ${MONTH_NAMES[Number(month) - 1]}`;
 }
 
-export function getFormatTime(isoString) {
-  return isoString.split('T')[1].slice(0, 5);
-}
-
 export function getDuration(startIso, endIso) {
   const start = new Date(startIso);
   const end = new Date(endIso);
@@ -59,13 +55,36 @@ export function getDuration(startIso, endIso) {
 
 export function getDateAndTimeFromISO(isoString) {
   if (!isoString) {
-    return '19/03/19 00:00';
+    return '"19/03/19 00:00"';
   }
+
   const d = new Date(isoString);
   const day = String(d.getDate()).padStart(2, '0');
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const year = String(d.getFullYear()).slice(-2);
   const hours = String(d.getHours()).padStart(2, '0');
   const minutes = String(d.getMinutes()).padStart(2, '0');
-  return `${day}/${month}/${year} ${hours}:${minutes}`;
+  return `"${day}/${month}/${year} ${hours}:${minutes}"`;
+}
+
+export function parseShortDateToISO(input) {
+  const [datePart, timePart] = input.split(' ');
+  const [day, month, year2d] = datePart.split('/');
+  const [hours, minutes] = timePart.split(':');
+
+  const year = parseInt(year2d, 10) >= 30 ? `19${year2d}` : `20${year2d}`;
+
+  const date = new Date(
+    parseInt(year, 10),
+    parseInt(month, 10) - 1,
+    parseInt(day, 10),
+    parseInt(hours, 10),
+    parseInt(minutes, 10),
+  );
+
+  return date.toISOString();
+}
+
+export function getFormatTime(isoString) {
+  return getDateAndTimeFromISO(isoString).slice(1, -1).split(' ')[1] || '';
 }
