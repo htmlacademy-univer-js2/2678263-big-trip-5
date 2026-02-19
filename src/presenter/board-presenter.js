@@ -32,4 +32,18 @@ export default class BoardPresenter {
   #handleModeChange = () => {
     // Callback для реакции на изменение точки маршрута
   };
+
+  // #handleModelEvent = (updateType, data) => {
+  //   switch (updateType) {
+  //     case UpdateType.PATCH:
+  //       this.#pointsListPresenter.init(this.#pointsModel.getEnrichedPoints());
+  //       break;
+  //     case UpdateType.MINOR:
+  //       this.#pointsListPresenter.init(this.#pointsModel.getEnrichedPoints());
+  //       break;
+  //     case UpdateType.MAJOR:
+  //       this.#pointsListPresenter.init(this.#pointsModel.getEnrichedPoints());
+  //       break;
+  //   }
+  // };
 }
