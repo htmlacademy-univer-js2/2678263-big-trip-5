@@ -230,11 +230,28 @@ export default class EditPointView extends AbstractStatefulView {
     this.element
       .querySelector('.event__rollup-btn')
       .addEventListener('click', this.#rollupClickHandler);
+    const priceInput = this.element.querySelector('#event-price-1');
+    if (priceInput) {
+      priceInput.addEventListener('input', this.#priceInputHandler);
+      priceInput.addEventListener('keydown', this.#priceKeydownHandler);
+    }
     form.addEventListener('change', this.#typeChangeHandler);
     form.addEventListener('change', this.#destinationChangeHandler);
     form.addEventListener('change', this.#offerCheckedHandler);
     form.addEventListener('change', this.#priceChangeHandler);
   }
+
+  #priceInputHandler = (evt) => {
+    evt.target.value = evt.target.value.replace(/[^0-9]/g, '');
+  };
+
+  #priceKeydownHandler = (evt) => {
+    const allowedKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'];
+
+    if (!/[0-9]/.test(evt.key) && !allowedKeys.includes(evt.key)) {
+      evt.preventDefault();
+    }
+  };
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
