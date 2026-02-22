@@ -3,6 +3,7 @@ import Observable from '../framework/observable';
 import { getPointRandom } from '../mock/points';
 import { offersMock } from '../mock/offers';
 import { destinationsMock } from '../mock/destination';
+import { FilterType } from '../constants.js';
 
 export default class PointsModel extends Observable {
   #points;
@@ -42,11 +43,25 @@ export default class PointsModel extends Observable {
     return allOffers.find((offer) => offer.type === type);
   }
 
-  // updatePoint(updatedPoint) {
-  //   this.#points = this.#points.map((point) =>
-  //     point.id === updatedPoint.id ? updatedPoint : point,
-  //   );
-  // }
+  getFilteredPoints(filterType) {
+    const points = this.#points;
+
+    switch (filterType) {
+      case FilterType.EVERYTHING:
+        return points;
+      case FilterType.FUTURE:
+        return points.filter((point) => new Date(point.dateFrom) > new Date());
+      case FilterType.PRESENT:
+        return points.filter((point) => {
+          const now = new Date();
+          return new Date(point.dateFrom) <= now && new Date(point.dateTo) >= now;
+        });
+      case FilterType.PAST:
+        return points.filter((point) => new Date(point.dateTo) < new Date());
+      default:
+        return points;
+    }
+  }
 
   updatePoint(updateType, update) {
     const index = this.#points.findIndex((point) => point.id === update.id);
@@ -80,8 +95,8 @@ export default class PointsModel extends Observable {
     this._notify(updateType, point);
   }
 
-  getEnrichedPoints() {
-    return this.#points.map((point) => {
+  getEnrichedPoints(pointsToEnrich = this.#points) {
+    return pointsToEnrich.map((point) => {
       const destinationItem = this.getDestinationById(point.destination);
       const destinationName = destinationItem?.name ?? 'Unknown';
       const destinationDescription = destinationItem?.description ?? '';

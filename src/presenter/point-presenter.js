@@ -80,8 +80,9 @@ export default class PointPresenter {
 
   update(updatedPoint) {
     this.#point = updatedPoint;
-    this.#pointComponent.update(updatedPoint);
-    this.#pointEditComponent.update(updatedPoint);
+    if (typeof this.#pointComponent?.update === 'function') {
+      this.#pointComponent.update(updatedPoint);
+    }
   }
 
   destroy() {

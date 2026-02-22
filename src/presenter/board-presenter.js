@@ -1,19 +1,26 @@
-import PointsModel from '../model/points-model.js';
 import PointsListPresenter from './points-list-presenter.js';
 import { UpdateType, UserAction } from '../constants.js';
+import FilterModel from '../model/filter-model.js';
 
 export default class BoardPresenter {
   #boardContainer = null;
-  #pointsModel = new PointsModel();
+  #pointsModel = null;
+  #filterModel = new FilterModel();
   #pointsListPresenter = null;
 
-  constructor({ boardContainer }) {
+  constructor({ boardContainer, pointsModel, filterModel }) {
     this.#boardContainer = boardContainer;
+    this.#pointsModel = pointsModel;
+    this.#filterModel = filterModel;
+
     this.#pointsModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   init() {
-    const points = this.#pointsModel.getEnrichedPoints();
+    const filterType = this.#filterModel.filter;
+    const filteredPoints = this.#pointsModel.getFilteredPoints(filterType);
+    const enrichedPoints = this.#pointsModel.getEnrichedPoints(filteredPoints);
     this.#pointsListPresenter = new PointsListPresenter({
       listContainer: this.#boardContainer,
       destinations: this.#pointsModel.destinations,
@@ -24,16 +31,15 @@ export default class BoardPresenter {
       getDescriptionById: (id) => this.#pointsModel.getDescriptionById(id),
       handleViewAction: this.#handleViewAction.bind(this),
     });
-    this.#pointsListPresenter.init(points);
+    this.#pointsListPresenter.init(enrichedPoints, filterType);
   }
 
   get points() {
     return this.#pointsModel.points;
   }
 
-  #handlePointChange = (updatedPoint) => {
-    this.#pointsModel.updatePoint(updatedPoint);
-    this.#pointsListPresenter.updatePoint(updatedPoint);
+  #handlePointChange = (updateType, updatedPoint) => {
+    this.#pointsModel.updatePoint(updateType, updatedPoint);
   };
 
   #handleModeChange = () => {
@@ -48,7 +54,10 @@ export default class BoardPresenter {
   }
 
   #renderBoard() {
-    const enrichedPoints = this.#pointsModel.getEnrichedPoints(); // Получаем обогащённые данные
+    const filterType = this.#filterModel.filter;
+    const filteredPoints = this.#pointsModel.getFilteredPoints(filterType);
+    const enrichedPoints = this.#pointsModel.getEnrichedPoints(filteredPoints);
+
     this.#pointsListPresenter = new PointsListPresenter({
       listContainer: this.#boardContainer,
       destinations: this.#pointsModel.destinations,
@@ -59,11 +68,10 @@ export default class BoardPresenter {
       getDescriptionById: (id) => this.#pointsModel.getDescriptionById(id),
       handleViewAction: this.#handleViewAction.bind(this),
     });
-    this.#pointsListPresenter.init(enrichedPoints); // Инициализируем презентер с данными
+    this.#pointsListPresenter.init(enrichedPoints, filterType);
   }
 
   #handleViewAction = (actionType, updateType, update) => {
-    // console.log(actionType, updateType, update);
     switch (actionType) {
       case UserAction.UPDATE_POINT:
         this.#pointsModel.updatePoint(updateType, update);
@@ -78,10 +86,8 @@ export default class BoardPresenter {
   };
 
   #handleModelEvent = (updateType, data) => {
-    // console.log(updateType, data);
     switch (updateType) {
       case UpdateType.PATCH:
-        // console.log('PATCH', data);
         this.#pointsListPresenter.updatePointById(data);
         break;
       case UpdateType.MINOR:

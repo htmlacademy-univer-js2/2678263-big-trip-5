@@ -105,6 +105,25 @@ export default class PointView extends AbstractView {
     this.#handleFavoriteClick();
   };
 
+  update(updatedPoint) {
+    if (updatedPoint.isFavorite !== this.#point.isFavorite) {
+      this.#point = updatedPoint;
+      this.#updateFavoriteButton();
+    }
+  }
+
+  #updateFavoriteButton() {
+    const btn = this.element.querySelector('.event__favorite-btn');
+    if (!btn) {
+      return;
+    }
+
+    if (this.#point.isFavorite) {
+      btn.classList.add('event__favorite-btn--active');
+    } else {
+      btn.classList.remove('event__favorite-btn--active');
+    }
+  }
 }
 
 
