@@ -1,13 +1,16 @@
 import { INITIAL_POINTS_COUNT } from '../constants';
+import Observable from '../framework/observable';
 import { getPointRandom } from '../mock/points';
 import { offersMock } from '../mock/offers';
 import { destinationsMock } from '../mock/destination';
+import { FilterType } from '../constants.js';
 
-export default class PointsModel {
+export default class PointsModel extends Observable {
   #points;
   #offers;
   #destinations;
   constructor() {
+    super();
     this.#points = Array.from({ length: INITIAL_POINTS_COUNT }, getPointRandom);
     this.#offers = offersMock;
     this.#destinations = destinationsMock;
@@ -40,14 +43,58 @@ export default class PointsModel {
     return allOffers.find((offer) => offer.type === type);
   }
 
-  updatePoint(updatedPoint) {
-    this.#points = this.#points.map((point) =>
-      point.id === updatedPoint.id ? updatedPoint : point
-    );
+  getFilteredPoints(filterType) {
+    const points = this.#points;
+
+    switch (filterType) {
+      case FilterType.FUTURE:
+        return points.filter((point) => new Date(point.dateFrom) > new Date());
+      case FilterType.PRESENT:
+        return points.filter((point) => {
+          const now = new Date();
+          return new Date(point.dateFrom) <= now && new Date(point.dateTo) >= now;
+        });
+      case FilterType.PAST:
+        return points.filter((point) => new Date(point.dateTo) < new Date());
+      default:
+        return points;
+    }
   }
 
-  getEnrichedPoints() {
-    return this.#points.map((point) => {
+  updatePoint(updateType, update) {
+    const index = this.#points.findIndex((point) => point.id === update.id);
+    if (index === -1) {
+      throw new Error('Point not found');
+    }
+    this.#points = [
+      ...this.#points.slice(0, index),
+      update,
+      ...this.#points.slice(index + 1),
+    ];
+    this._notify(updateType, update);
+  }
+
+  addPoint(updateType, point) {
+    this.#points = [point, ...this.#points];
+    this._notify(updateType, point);
+  }
+
+  deletePoint(updateType, point) {
+    const index = this.#points.findIndex((p) => p.id === point.id);
+
+    if (index === -1) {
+      throw new Error('Point not found');
+    }
+
+    this.#points = [
+      ...this.#points.slice(0, index),
+      ...this.#points.slice(index + 1),
+    ];
+    this._notify(updateType, point);
+  }
+
+  getEnrichedPoints(pointsToEnrich = this.#points) {
+    return pointsToEnrich.map((point) => {
       const destinationItem = this.getDestinationById(point.destination);
       const destinationName = destinationItem?.name ?? 'Unknown';
       const destinationDescription = destinationItem?.description ?? '';

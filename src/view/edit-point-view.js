@@ -1,6 +1,7 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { getDateAndTimeFromISO } from '../utils/utils.js';
 import flatpickr from 'flatpickr';
+import { UpdateType, UserAction } from '../constants.js';
 
 import 'flatpickr/dist/flatpickr.min.css';
 
@@ -13,12 +14,12 @@ function createDestinationOptions(destinationNames) {
 function editPointTemplate(point) {
   const {
     type = 'flight',
-    destinationName = 'Unknown',
+    destinationName = '',
     dateFrom,
     dateTo,
     basePrice = '',
     resolvedOffers = [],
-    destinationDescription = '-',
+    destinationDescription = '',
     destinationPictures = [],
   } = point || {};
 
@@ -109,7 +110,15 @@ function editPointTemplate(point) {
             <label class="event__label  event__type-output" for="event-destination-1">
               ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value=${destinationName} list="destination-list-1">
+              <input
+              class="event__input  event__input--destination"
+              id="event-destination-1"
+              type="text"
+              name="event-destination"
+              value="${destinationName}"
+              placeholder="Choose destination"
+              list="destination-list-1"
+            >
             <datalist id="destination-list-1">
               ${createDestinationOptions(destinationNames)}
             </datalist>
@@ -222,20 +231,65 @@ export default class EditPointView extends AbstractStatefulView {
     this.element
       .querySelector('.event__rollup-btn')
       .addEventListener('click', this.#rollupClickHandler);
+    const priceInput = this.element.querySelector('#event-price-1');
+    if (priceInput) {
+      priceInput.addEventListener('input', this.#priceInputHandler);
+      priceInput.addEventListener('keydown', this.#priceKeydownHandler);
+    }
     form.addEventListener('change', this.#typeChangeHandler);
     form.addEventListener('change', this.#destinationChangeHandler);
     form.addEventListener('change', this.#offerCheckedHandler);
     form.addEventListener('change', this.#priceChangeHandler);
   }
 
+  #priceInputHandler = (evt) => {
+    evt.target.value = evt.target.value.replace(/[^0-9]/g, '');
+  };
+
+  #priceKeydownHandler = (evt) => {
+    const allowedKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'];
+
+    if (!/[0-9]/.test(evt.key) && !allowedKeys.includes(evt.key)) {
+      evt.preventDefault();
+    }
+  };
+
+  #validateForm() {
+    const errors = [];
+
+    if (!this._state.basePrice || this._state.basePrice <= 0) {
+      errors.push('Price must be greater than 0');
+    }
+
+    if (!this._state.destination || !this._state.destinationName) {
+      errors.push('Destination is required');
+    }
+
+    if (this._state.dateFrom && this._state.dateTo) {
+      if (new Date(this._state.dateTo) < new Date(this._state.dateFrom)) {
+        errors.push('The trip is too short');
+      }
+    }
+    // позже хочу доделать, чтобы пользователь видел сообщение
+    return errors;
+  }
+
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
+    const errors = this.#validateForm();
+    if (errors.length > 0) {
+      return;
+    }
     this.#handleFormSubmit(EditPointView.parseStateToPoint(this._state));
   };
 
   #deleteClickHandler = (evt) => {
     evt.preventDefault();
-    this.#handeleDeleteClick();
+    this.#handeleDeleteClick(
+      UserAction.DELETE_POINT,
+      UpdateType.MINOR,
+      EditPointView.parseStateToPoint(this._state)
+    );
   };
 
   #rollupClickHandler = (evt) => {
