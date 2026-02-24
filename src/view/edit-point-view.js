@@ -1,6 +1,7 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { getDateAndTimeFromISO } from '../utils/utils.js';
 import flatpickr from 'flatpickr';
+import { UpdateType, UserAction } from '../constants.js';
 
 import 'flatpickr/dist/flatpickr.min.css';
 
@@ -253,14 +254,42 @@ export default class EditPointView extends AbstractStatefulView {
     }
   };
 
+  #validateForm() {
+    const errors = [];
+
+    if (!this._state.basePrice || this._state.basePrice <= 0) {
+      errors.push('Price must be greater than 0');
+    }
+
+    if (!this._state.destination || !this._state.destinationName) {
+      errors.push('Destination is required');
+    }
+
+    if (this._state.dateFrom && this._state.dateTo) {
+      if (new Date(this._state.dateTo) < new Date(this._state.dateFrom)) {
+        errors.push('The trip is too short');
+      }
+    }
+    // позже хочу доделать, чтобы пользователь видел сообщение
+    return errors;
+  }
+
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
+    const errors = this.#validateForm();
+    if (errors.length > 0) {
+      return;
+    }
     this.#handleFormSubmit(EditPointView.parseStateToPoint(this._state));
   };
 
   #deleteClickHandler = (evt) => {
     evt.preventDefault();
-    this.#handeleDeleteClick();
+    this.#handeleDeleteClick(
+      UserAction.DELETE_POINT,
+      UpdateType.MINOR,
+      EditPointView.parseStateToPoint(this._state)
+    );
   };
 
   #rollupClickHandler = (evt) => {

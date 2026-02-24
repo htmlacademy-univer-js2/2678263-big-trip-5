@@ -136,7 +136,11 @@ export default class PointPresenter {
   };
 
   #handleDeleteClick = () => {
-    this.#handleDataChange(this.#point);
+    this.#handleDataChange(
+      UserAction.DELETE_POINT,
+      UpdateType.MINOR,
+      this.#point
+    );
     this.destroy();
   };
 

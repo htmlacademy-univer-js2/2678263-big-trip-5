@@ -47,8 +47,6 @@ export default class PointsModel extends Observable {
     const points = this.#points;
 
     switch (filterType) {
-      case FilterType.EVERYTHING:
-        return points;
       case FilterType.FUTURE:
         return points.filter((point) => new Date(point.dateFrom) > new Date());
       case FilterType.PRESENT:
