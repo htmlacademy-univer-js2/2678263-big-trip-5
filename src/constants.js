@@ -1,5 +1,3 @@
-export const INITIAL_POINTS_COUNT = 5;
-
 export const MONTH_NAMES = [
   'JAN',
   'FEB',

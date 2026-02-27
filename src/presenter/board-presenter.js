@@ -2,6 +2,8 @@ import PointsListPresenter from './points-list-presenter.js';
 import NewPointPresenter from './new-point-presenter.js';
 import { UpdateType, UserAction, FilterType } from '../constants.js';
 import FilterModel from '../model/filter-model.js';
+import { render, remove } from '../framework/render.js';
+import LoadingView from '../view/loading-view.js';
 
 export default class BoardPresenter {
   #boardContainer = null;
@@ -10,6 +12,9 @@ export default class BoardPresenter {
   #pointsListPresenter = null;
   #newPointPresenter = null;
   #isCreatingNewPoint = false;
+  #loadingComponent = new LoadingView();
+
+  #isLoading = true;
 
   constructor({ boardContainer, pointsModel, filterModel }) {
     this.#boardContainer = boardContainer;
@@ -28,20 +33,7 @@ export default class BoardPresenter {
   }
 
   init() {
-    const filterType = this.#filterModel.filter;
-    const filteredPoints = this.#pointsModel.getFilteredPoints(filterType);
-    const enrichedPoints = this.#pointsModel.getEnrichedPoints(filteredPoints);
-    this.#pointsListPresenter = new PointsListPresenter({
-      listContainer: this.#boardContainer,
-      destinations: this.#pointsModel.destinations,
-      onPointChange: this.#handlePointChange,
-      onModeChange: this.#handleModeChange,
-      getOffersByType: (type) => this.#pointsModel.getOfferByType(type),
-      getDestinationById: (id) => this.#pointsModel.getDestinationById(id),
-      getDescriptionById: (id) => this.#pointsModel.getDescriptionById(id),
-      handleViewAction: this.#handleViewAction.bind(this),
-    });
-    this.#pointsListPresenter.init(enrichedPoints, filterType);
+    this.#renderBoard();
   }
 
   get points() {
@@ -79,6 +71,10 @@ export default class BoardPresenter {
   }
 
   #renderBoard() {
+    if (this.#isLoading) {
+      render(this.#loadingComponent, this.#boardContainer);
+      return;
+    }
     const filterType = this.#filterModel.filter;
     const filteredPoints = this.#pointsModel.getFilteredPoints(filterType);
     const enrichedPoints = this.#pointsModel.getEnrichedPoints(filteredPoints);
@@ -127,7 +123,12 @@ export default class BoardPresenter {
         this.#clearBoard();
         this.#renderBoard();
         break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#clearBoard();
+        this.#renderBoard();
+        break;
     }
   };
-
 }

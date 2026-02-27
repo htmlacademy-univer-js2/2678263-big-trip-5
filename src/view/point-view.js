@@ -1,6 +1,8 @@
 import AbstractView from '../framework/view/abstract-view.js';
+import dayjs from 'dayjs';
 
 import {getFormatDate, getFormatTime, getDuration} from '../utils/utils.js';
+
 
 function createPointTemplate(point) {
   const {
@@ -14,6 +16,7 @@ function createPointTemplate(point) {
   } = point;
 
   const dateStr = getFormatDate(dateFrom);
+  const dateTimeAttr = dayjs(dateFrom).format('YYYY-MM-DD');
   const timeStart = getFormatTime(dateFrom);
   const timeEnd = getFormatTime(dateTo);
   const duration = getDuration(dateFrom, dateTo);
@@ -36,7 +39,7 @@ function createPointTemplate(point) {
   return `
     <li class="trip-events__item">
       <div class="event">
-        <time class="event__date" datetime="${dateFrom.split('T')[0]}">${dateStr}</time>
+        <time class="event__date" datetime="${dateTimeAttr}">${dateStr}</time>
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="${typeIcon}" alt="Event type icon">
         </div>

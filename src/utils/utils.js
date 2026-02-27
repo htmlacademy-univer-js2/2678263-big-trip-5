@@ -3,10 +3,6 @@ import duration from 'dayjs/plugin/duration.js';
 
 dayjs.extend(duration);
 
-export function getRandomArrayElement(items) {
-  return items[Math.floor(Math.random() * items.length)];
-}
-
 export function getFormatDate(isoString) {
   if (!isoString) {
     return '';

@@ -12,7 +12,7 @@ const filterContainer = document.querySelector('.trip-controls__filters');
 const newEventButton = document.querySelector('.trip-main__event-add-btn');
 
 const pointsModel = new PointsModel({
-  pointsApiService: new PointsApiService(END_POINT, AUTHORIZATION)
+  pointsApiService: new PointsApiService(END_POINT, AUTHORIZATION),
 });
 
 const filterModel = new FilterModel();
@@ -29,12 +29,14 @@ const filterPresenter = new FilterPresenter({
   filterModel,
 });
 
-if (newEventButton) {
-  newEventButton.addEventListener('click', () => {
-    boardPresenter.handleNewEventClick();
-  });
-}
+newEventButton.disabled = true;
 
 boardPresenter.init();
 filterPresenter.init();
-pointsModel.init();
+pointsModel.init().finally(() => {
+  newEventButton.disabled = false;
+
+  newEventButton.addEventListener('click', () => {
+    boardPresenter.handleNewEventClick();
+  });
+});

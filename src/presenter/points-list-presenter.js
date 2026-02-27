@@ -120,7 +120,9 @@ export default class PointsListPresenter {
 
   #renderPoints() {
     if (this.#points.length === 0) {
-      this.#emptyComponent = new EmptyView({ filterType: this.#currentFilterType });
+      this.#emptyComponent = new EmptyView({
+        filterType: this.#currentFilterType,
+      });
       render(this.#emptyComponent, this.#listContainer);
       return;
     }
@@ -152,5 +154,4 @@ export default class PointsListPresenter {
   #handleViewAction = (actionType, updateType, update) => {
     this.#handleViewAction(actionType, updateType, update);
   };
-
 }
