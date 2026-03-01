@@ -66,6 +66,11 @@ export default class PointsListPresenter {
     this.init(this.#points, filterType);
   }
 
+  getPointPresenterById(id) {
+    return this.#pointPresenters.get(id);
+  }
+
+
   #handleModeChange = () => {
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
     this.#onModeChange();

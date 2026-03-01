@@ -49,23 +49,52 @@ export default class NewPointPresenter {
     render(this.#addComponent, this.#listContainer, RenderPosition.AFTERBEGIN);
     requestAnimationFrame(() => {
       this.#addComponent.initDatePickers?.();
+      document.addEventListener('keydown', this.#escKeyDownHandler);
     });
   }
 
   #handleFormSubmit = (point) => {
     this.#onDataChange(UserAction.ADD_POINT, UpdateType.MINOR, point);
-    this.destroy();
   };
 
   #handleCancelClick = () => {
     this.destroy();
   };
 
-  destroy() {
-    if (this.#addComponent) {
-      remove(this.#addComponent);
-      this.#addComponent = null;
-    }
-    this.#onDestroy();
+  setSaving() {
+    this.#addComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
   }
+
+  setAborting() {
+    const resetFormState = () => {
+      this.#addComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#addComponent.shake(resetFormState);
+  }
+
+  destroy() {
+    if (this.#addComponent === null) {
+      return;
+    }
+
+    this.#onDestroy();
+    remove(this.#addComponent);
+    this.#addComponent = null;
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
+  }
+
+  #escKeyDownHandler = (evt) => {
+    if (evt.key === 'Escape' || evt.key === 'Esc') {
+      evt.preventDefault();
+      this.destroy();
+    }
+  };
 }
