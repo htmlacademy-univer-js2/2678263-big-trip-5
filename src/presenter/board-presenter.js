@@ -26,6 +26,7 @@ export default class BoardPresenter {
       pointsModel: this.#pointsModel,
       onDataChange: this.#handleViewAction.bind(this),
       onDestroy: this.#handleNewPointFormClose,
+      getOffersByType: (type) => this.#pointsModel.getOfferByType(type),
     });
 
     this.#pointsModel.addObserver(this.#handleModelEvent);

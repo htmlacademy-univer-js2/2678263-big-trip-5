@@ -422,12 +422,12 @@ export default class EditPointView extends AbstractStatefulView {
     );
   }
 
-  static parsePointToState(point, offersByType) {
+  static parsePointToState(point, offersByType = []) {
     return {
       ...point,
       resolvedOffers: offersByType.map((offer) => ({
         ...offer,
-        isChecked: point.offers.includes(offer.id),
+        isChecked: point.offers.includes(offer.id) ?? false,
       })),
     };
   }
