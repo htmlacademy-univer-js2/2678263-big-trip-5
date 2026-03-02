@@ -8,12 +8,15 @@ export default class NewPointPresenter {
   #onDataChange = null;
   #onDestroy = null;
   #addComponent = null;
+  #getOffersByType = null;
 
-  constructor({ listContainer, pointsModel, onDataChange, onDestroy }) {
+
+  constructor({ listContainer, pointsModel, onDataChange, onDestroy, getOffersByType }) {
     this.#listContainer = listContainer;
     this.#pointsModel = pointsModel;
     this.#onDataChange = onDataChange;
     this.#onDestroy = onDestroy;
+    this.#getOffersByType = getOffersByType;
   }
 
   init() {
@@ -22,12 +25,11 @@ export default class NewPointPresenter {
     }
 
     const newPoint = {
-      id: crypto.randomUUID(),
       type: 'flight',
       destination: '',
       destinationName: '',
-      dateFrom: new Date().toISOString(),
-      dateTo: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      dateFrom: new Date(),
+      dateTo: new Date(Date.now() + 60 * 60 * 1000),
       basePrice: 0,
       isFavorite: false,
       offers: [],
@@ -37,6 +39,7 @@ export default class NewPointPresenter {
     this.#addComponent = new EditPointView({
       point: newPoint,
       destinations: this.#pointsModel.destinations,
+      offersByType: this.#getOffersByType(newPoint.type)?.offers ?? [],
       onFormSubmit: this.#handleFormSubmit,
       onDeleteClick: this.#handleCancelClick,
       onRollupClick: this.#handleCancelClick,
@@ -46,23 +49,52 @@ export default class NewPointPresenter {
     render(this.#addComponent, this.#listContainer, RenderPosition.AFTERBEGIN);
     requestAnimationFrame(() => {
       this.#addComponent.initDatePickers?.();
+      document.addEventListener('keydown', this.#escKeyDownHandler);
     });
   }
 
   #handleFormSubmit = (point) => {
     this.#onDataChange(UserAction.ADD_POINT, UpdateType.MINOR, point);
-    this.destroy();
   };
 
   #handleCancelClick = () => {
     this.destroy();
   };
 
-  destroy() {
-    if (this.#addComponent) {
-      remove(this.#addComponent);
-      this.#addComponent = null;
-    }
-    this.#onDestroy();
+  setSaving() {
+    this.#addComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
   }
+
+  setAborting() {
+    const resetFormState = () => {
+      this.#addComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#addComponent.shake(resetFormState);
+  }
+
+  destroy() {
+    if (this.#addComponent === null) {
+      return;
+    }
+
+    this.#onDestroy();
+    remove(this.#addComponent);
+    this.#addComponent = null;
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
+  }
+
+  #escKeyDownHandler = (evt) => {
+    if (evt.key === 'Escape' || evt.key === 'Esc') {
+      evt.preventDefault();
+      this.destroy();
+    }
+  };
 }

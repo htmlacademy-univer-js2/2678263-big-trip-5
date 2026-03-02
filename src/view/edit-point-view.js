@@ -21,6 +21,9 @@ function editPointTemplate(point) {
     resolvedOffers = [],
     destinationDescription = '',
     destinationPictures = [],
+    isDisabled = false,
+    isSaving = false,
+    isDeleting = false,
   } = point || {};
 
   const destinationNames = Array.isArray(point.destinations)
@@ -137,11 +140,17 @@ function editPointTemplate(point) {
               <span class="visually-hidden">Price</span>
               &euro;
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice || ''}">
+            <input class="event__input event__input--price" id="event-price-1" type="text" name="event-price" ${isDisabled ? 'disabled' : ''} value="${basePrice || ''}">
           </div>
 
-          <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-          <button class="event__reset-btn" type="reset">Delete</button>
+          <button class="event__save-btn btn btn--blue" type="submit"
+            ${isDisabled ? 'disabled' : ''}>
+              ${isSaving ? 'Saving...' : 'Save'}
+            </button>
+          <button class="event__reset-btn" type="reset"
+             ${isDisabled ? 'disabled' : ''}>
+              ${isDeleting ? 'Deleting...' : 'Delete'}
+            </button>
           <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
           </button>
@@ -422,13 +431,16 @@ export default class EditPointView extends AbstractStatefulView {
     );
   }
 
-  static parsePointToState(point, offersByType) {
+  static parsePointToState(point, offersByType = []) {
     return {
       ...point,
       resolvedOffers: offersByType.map((offer) => ({
         ...offer,
-        isChecked: point.offers.includes(offer.id),
+        isChecked: point.offers?.includes(offer.id) ?? false,
       })),
+      isDisabled: false,
+      isSaving: false,
+      isDeleting: false,
     };
   }
 
@@ -440,6 +452,12 @@ export default class EditPointView extends AbstractStatefulView {
         .filter((offer) => offer.isChecked)
         .map((offer) => offer.id);
     }
+
+    delete point.resolvedOffers;
+    delete point.isDisabled;
+    delete point.isSaving;
+    delete point.isDeleting;
+
     return point;
   }
 }

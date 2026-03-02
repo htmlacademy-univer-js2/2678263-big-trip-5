@@ -101,23 +101,34 @@ export default class PointsModel extends Observable {
     }
   }
 
-  addPoint(updateType, point) {
-    this.#points = [point, ...this.#points];
-    this._notify(updateType, point);
+  async addPoint(updateType, point) {
+    try {
+      const response = await this.#pointsApiService.addPoint(point);
+      const newPoint = this.#adaptToClient(response);
+      this.#points = [newPoint, ...this.#points];
+      this._notify(updateType, newPoint);
+    } catch (err) {
+      throw new Error('Can\'t add task');
+    }
   }
 
-  deletePoint(updateType, point) {
+  async deletePoint(updateType, point) {
     const index = this.#points.findIndex((p) => p.id === point.id);
 
     if (index === -1) {
       throw new Error('Point not found');
     }
 
-    this.#points = [
-      ...this.#points.slice(0, index),
-      ...this.#points.slice(index + 1),
-    ];
-    this._notify(updateType, point);
+    try {
+      await this.#pointsApiService.deletePoint(point);
+      this.#points = [
+        ...this.#points.slice(0, index),
+        ...this.#points.slice(index + 1),
+      ];
+      this._notify(updateType, point);
+    } catch (err) {
+      throw new Error('Can\'t delete task');
+    }
   }
 
   getEnrichedPoints(pointsToEnrich = this.#points) {
